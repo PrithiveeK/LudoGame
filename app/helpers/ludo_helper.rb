@@ -1,0 +1,2 @@
+module LudoHelper
+end
