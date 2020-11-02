@@ -2,8 +2,6 @@
 
 en:
   devise:
-    FB_APP_ID: "2534429040182106"
-    FB_SECRET: "c05936510c6eddf01e8041184196bbde"
     confirmations:
       confirmed: "Your email address has been successfully confirmed."
       send_instructions: "You will receive an email with instructions for how to confirm your email address in a few minutes."
