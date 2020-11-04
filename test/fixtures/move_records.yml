@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  game: one
+  player: MyString
+  piece: MyString
+  die: 1
+
+two:
+  game: two
+  player: MyString
+  piece: MyString
+  die: 1

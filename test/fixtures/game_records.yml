@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  game: one
+  player1: MyString
+  player2: MyString
+  player3: MyString
+  player4: MyString
+  save: false
+
+two:
+  game: two
+  player1: MyString
+  player2: MyString
+  player3: MyString
+  player4: MyString
+  save: false

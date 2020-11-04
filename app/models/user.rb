@@ -9,7 +9,8 @@ class User < ApplicationRecord
   has_one :user_record
   has_many :games, dependent: :nullify
   validates :username, presence: true
-  has_many :invites
+  has_many :invites, :class_name => "Invite", :foreign_key => "created_by_id"
+  has_many :invited_players
   has_many :orders
   has_many :products, through: :orders
 
@@ -19,6 +20,14 @@ class User < ApplicationRecord
       user.username = auth.info.name
       user.passord = Devise.friendly_token[0,20]
     end
+  end
+
+  def can_access_game?(code)
+    return Invite.find_by_code(code)&.game&.am_i_a_player?(self.id)
+  end
+
+  def find_invite_by_code(code)
+    invited_players.find_by invite: Invite.find_by_code(code)
   end
 
 end

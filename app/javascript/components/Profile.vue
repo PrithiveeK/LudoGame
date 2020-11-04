@@ -2,9 +2,9 @@
   <section>
     <div class="edit-part">
       <img :src="currentUser.avatar.url" />
-      <input type="file" name="avatar" value="Change Avatar" @change="changeAvatar" :ref="'avatar'" hidden />
-      <button @click="initChangeAvatar">Change Avatar</button>
-      <button @click="logout">Logout</button>
+      <input type="file" name="avatar" accept="images/*" value="Change Avatar" @change="changeAvatar" :ref="'avatar'" hidden />
+      <button @click="initChangeAvatar" class="game-btn">Change Avatar</button>
+      <button @click="logout" class="game-btn">Logout</button>
     </div>
     <div class="profile-part">
       <div class="input-container" :class="{ error: username.error }">
@@ -23,8 +23,8 @@
         <label>Confirm Password</label>
         <input type="password" v-model="confirm_password.value" :disabled="!canIEdit" />
       </div>
-      <button @click="initUpdateUser" v-if="canIEdit">Update Profile</button>
-      <button @click="canIEdit = true" v-else>Edit Profile</button>
+      <button @click="initUpdateUser" v-if="canIEdit" class="game-btn">Update Profile</button>
+      <button @click="canIEdit = true" v-else class="game-btn">Edit Profile</button>
     </div>
     <Popup :showMe="confirmYourPassword" @close="confirmYourPassword = false">
       <form @submit.prevent="updateUser" @keyup:enter.prevent="updateUser" style="display: contents;">
@@ -32,7 +32,7 @@
           <label for="">Confirm Your Password</label>
           <input type="password" v-model="current_password.value">
         </div>
-        <button type="submit">Proceed</button>
+        <button type="submit" class="game-btn">Proceed</button>
       </form>
     </Popup>
   </section>
@@ -79,6 +79,7 @@ export default {
   },
   methods: {
     changeAvatar(event) {
+      if (!event.target.files[0]) return
       const formData = new FormData()
       formData.append(event.target.name, event.target.files[0])
       fetch(`/api/users/${this.currentUser.id}/avatar`, {
@@ -162,25 +163,7 @@ section {
 }
 img {
   width: 100%;
-}
-button {
-  font-size: 1.7rem;
-  outline: none;
-  background-color: #4275a7;
-  padding: 5px 10px;
-  color: white;
-  box-shadow: 0 4px 14px 2px #2c3e50;
-  border-radius: 8px;
-  transition: all 0.3s;
-  border: none;
-}
-button:hover {
-  box-shadow: 0 8px 18px 8px #2c3e50;
-  transform: scale(1.03);
-}
-button:active {
-  box-shadow: 0 1px 8px 1px #2c3e50;
-  transform: scale(0.98);
+  height: 100%;
 }
 .input-container {
   display: flex;

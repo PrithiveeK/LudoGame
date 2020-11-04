@@ -6,8 +6,8 @@ class Ability
   def initialize(user)
     if user
       can :read, :all
-      can :manage, UserRecord, user_id: user.id
-      can :manage, Invite, created_by_id: user.id
+      can :manage, UserRecord, { user_id: user.id }
+      can :read, Invite, { created_by_id: user.id }
     end
 
     # Define abilities for the passed in user here. For example:

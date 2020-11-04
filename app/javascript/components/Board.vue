@@ -5,7 +5,15 @@
     <Player class="blue player_2" />
     <Player class="green player_3" />
     <Player class="yellow player_4" />
-    <MoveBoard />
+    <MoveBoard v-show="!isOnlineMode || (isStarted && !isFinished)" />
+    <transition name="fade">
+      <div class="joining-window" v-if="isOnlineMode && !isStarted">Waiting for the Players to Join...</div>
+    </transition>
+    <div class="score-board" v-if="isFinished">
+      <ul>
+        <li v-for="player in scoreBoard" :key="player">{{player}}</li>
+      </ul>
+    </div>
   </div>
 </template>
 
@@ -14,10 +22,24 @@ import Player from "./Player.vue";
 import MoveBoard from "./MoveBoard.vue";
 
 export default {
+  computed: {
+    isOnlineMode() {
+      return this.$store.state.onlineMode
+    },
+    isStarted() {
+      return this.$store.state.isStarted
+    },
+    isFinished() {
+      return this.$store.state.isEnd
+    },
+    scoreBoard() {
+      return this.$store.state.scoreBoard
+    }
+  },
   components: {
     Player,
     MoveBoard
-  }  
+  }
 }
 </script>
 
@@ -127,5 +149,28 @@ export default {
 .game-home {
   grid-column: 2;
   grid-row: 2;
+}
+.joining-window{
+  pointer-events: all !important;
+  position: fixed;
+  background-color: #00000090;
+  height: 100vh;
+  width: 100%;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 3rem;
+  font-weight: 900;
+}
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 0
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 1s ease;
 }
 </style>

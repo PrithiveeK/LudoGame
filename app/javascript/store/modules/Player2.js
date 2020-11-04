@@ -15,13 +15,6 @@ const moveGrid = [
   [1, 8], [2, 8], [3, 8], [4, 8], [5, 8], [6, 8], [7, 8]
 ];
 
-function convertToGrid([row, col]) {
-  return {
-    "grid-row": row,
-    "grid-column": col
-  };
-}
-
 const state = {
   piece1: {
     currentPosition: -1,
@@ -47,67 +40,79 @@ const state = {
     isOut: false,
     isHome: false
   },
-  isEnd: false,
+  choosePiece: false,
+  dice: 6,
+  isRolling: false,
+  noOfPiecesHome: 0,
   noOfPiecesOut: 0
 };
 
 const getters = {
   piecePosition: (state) => (piece) => {
     const pos = state[piece].currentPosition;
-    if (pos === -1) {
-      return {
-        "grid-row": state[piece].defaultPosition[0],
-        "grid-column": state[piece].defaultPosition[1]
-      }
+    return {
+      "grid-row": pos === -1 ? state[piece].defaultPosition[0] : moveGrid[pos][0],
+      "grid-column": pos === -1 ? state[piece].defaultPosition[1] : moveGrid[pos][1]
     }
-    return convertToGrid(moveGrid[pos]);
   },
-  defaultPiecePositions: (state, getters) => {
-    return [
-      getters.piecePosition("piece1"),
-      getters.piecePosition("piece2"),
-      getters.piecePosition("piece3"),
-      getters.piecePosition("piece4")
-    ]
-  },
-  tracePath: (state, getters) => (piece, prevI, dice) => {
-    if (prevI === -1) {
-      return [getters.piecePosition(piece)];
+  piecePositionRaw: (state) => (piece) => {
+    const pos = state[piece].currentPosition;
+    return {
+      row: pos === -1 ? 0 : moveGrid[pos][0],
+      col: pos === -1 ? 0 : moveGrid[pos][1]
     }
-    return moveGrid.slice(prevI + 1, prevI + dice + 1).map(pos => convertToGrid(pos))
   }
 };
 
 const mutations = {
+  choosePiece(state, choose) {
+    state.choosePiece = choose
+  },
+  roll(state, isRolling) {
+    state.isRolling = isRolling
+  },
+  rollDice(state, dice) {
+    state.isRolling = false
+    state.dice = dice
+  },
   startPiece(state, whichPiece) {
+    console.log(whichPiece + " entered");
     state[whichPiece].currentPosition = 0;
     state[whichPiece].isOut = true;
     ++state.noOfPiecesOut;
   },
   movePiece(state, payload) {
-    state[payload.whichPiece].currentPosition += payload.dice;
+    if (state[payload.whichPiece].currentPosition + payload.dice <= 56)
+      state[payload.whichPiece].currentPosition += payload.dice
+    if (state[payload.whichPiece].currentPosition === 56) {
+      state[payload.whichPiece].isHome = true
+      ++state.noOfPiecesHome
+    }
+  },
+  killPiece(state, whichPiece) {
+    state[whichPiece].currentPosition = -1;
+    state[whichPiece].isOut = false;
+    --state.noOfPiecesOut;
   }
 };
 
 const actions = {
-  diceRolled(ctx, payload) {
+  async diceRolled(ctx, payload) {
     console.log("Player2 rolled");
     if (ctx.state.noOfPiecesOut === 0 && payload.dice !== 6) return true;
     return false;
   },
-  movePiece(ctx, payload) {
+  async movePiece(ctx, payload) {
     console.log("Player2 moved");
-    const currPiece = "piece" + payload.whichPiece;
-    const prevI = ctx.state[currPiece].currentPosition;
-    if (payload.dice === 6 && !ctx.state[currPiece].isOut) {
-      ctx.commit("startPiece", currPiece);
+    if (payload.dice === 6 && !ctx.state[payload.whichPiece].isOut) {
+      ctx.commit("startPiece", payload.whichPiece);
     } else {
       ctx.commit("movePiece", {
-        whichPiece: currPiece,
+        whichPiece: payload.whichPiece,
         dice: payload.dice
       })
     }
-    return ctx.getters.tracePath(currPiece, prevI, payload.dice);
+    return ctx.getters.piecePositionRaw(payload.whichPiece);
   }
 };
 

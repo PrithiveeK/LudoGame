@@ -12,6 +12,7 @@ Rails.application.routes.draw do
     get 'users/auth/facebook', to: 'users#facebook'
     get '/users/verify', to: 'users#verify'
     resources :invites, only: [:index]
+    get 'invites/today', to: 'invites#now'
     resources :games, only: [:create]
     resources :products, only: [:index]
   end

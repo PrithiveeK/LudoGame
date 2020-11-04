@@ -1,6 +1,6 @@
 <template>
-  <div class="dice" @click="roll" :class="{ roll: rollDice }">
-    <div class="front">
+  <div class="dice" @click="$emit('roll')" :class="{ roll: rollDice }" :style="{transform: transform}">
+    <div class="dice-front">
       <span></span>
       <span></span>
       <span></span>
@@ -8,26 +8,26 @@
       <span></span>
       <span></span>
     </div>
-    <div class="back">
+    <div class="dice-back">
       <span></span>
     </div>
-    <div class="right">
+    <div class="dice-right">
       <span></span>
       <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-    <div class="left">
-      <span></span>
-      <span></span>
-    </div>
-    <div class="top">
       <span></span>
       <span></span>
       <span></span>
     </div>
-    <div class="bottom">
+    <div class="dice-left">
+      <span></span>
+      <span></span>
+    </div>
+    <div class="dice-top">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div class="dice-bottom">
       <span></span>
       <span></span>
       <span></span>
@@ -38,14 +38,27 @@
 
 <script lang="js">
 export default {
+  props: ['rollDice', 'diceValue'],
   data () {
     return {
-      rollDice: false
+      // rollDice: false
+    }
+  },
+  computed: {
+    transform() {
+      return [
+        "rotateX(180deg)",
+        "rotateY(90deg)",
+        "rotateX(-90deg)",
+        "rotateX(90deg)",
+        "rotateY(-90deg)",
+        "rotate(0deg)"
+      ][this.diceValue - 1];
     }
   },
   methods: {
     roll() {
-      this.rollDice = true;
+      // this.rollDice = true;
       setTimeout(() => {
         const value = Math.floor((Math.random() * 9876543210) % 6);
         const transform = [
@@ -57,7 +70,7 @@ export default {
           "rotate(0deg)"
         ][value];
         this.$el.style.transform = transform;
-        this.rollDice = false;
+        // this.rollDice = false;
         this.$emit("roll", value + 1);
       }, 1000);
     }
@@ -74,7 +87,7 @@ export default {
   transform: rotateX(0deg) rotateY(0deg) translateX(0);
 }
 .dice.roll {
-  animation: roll 1s forwards;
+  animation: roll 1s forwards infinite;
 }
 .dice > div {
   height: inherit;
@@ -91,105 +104,105 @@ export default {
   display: block;
   position: absolute;
 }
-.dice .front {
+.dice .dice-front {
   transform: rotateY(0deg) translateZ(25px);
 }
-.dice .front span:nth-child(1) {
+.dice .dice-front span:nth-child(1) {
   top: 10px;
   left: 12px;
 }
-.dice .front span:nth-child(2) {
+.dice .dice-front span:nth-child(2) {
   top: 10px;
   right: 12px;
 }
-.dice .front span:nth-child(3) {
+.dice .dice-front span:nth-child(3) {
   top: 21px;
   left: 12px;
 }
-.dice .front span:nth-child(4) {
+.dice .dice-front span:nth-child(4) {
   top: 21px;
   right: 12px;
 }
-.dice .front span:nth-child(5) {
+.dice .dice-front span:nth-child(5) {
   bottom: 10px;
   left: 12px;
 }
-.dice .front span:nth-child(6) {
+.dice .dice-front span:nth-child(6) {
   bottom: 10px;
   right: 12px;
 }
-.dice .back {
+.dice .dice-back {
   transform: rotateX(180deg) translateZ(25px);
 }
-.dice .back span {
+.dice .dice-back span {
   top: 21px;
   left: 21px;
 }
-.dice .right {
+.dice .dice-right {
   transform: rotateY(90deg) translateZ(25px);
 }
-.dice .right span:nth-child(1) {
+.dice .dice-right span:nth-child(1) {
   top: 12px;
   left: 12px;
 }
-.dice .right span:nth-child(2) {
+.dice .dice-right span:nth-child(2) {
   top: 12px;
   right: 12px;
 }
-.dice .right span:nth-child(3) {
+.dice .dice-right span:nth-child(3) {
   top: 21px;
   left: 21px;
 }
-.dice .right span:nth-child(4) {
+.dice .dice-right span:nth-child(4) {
   bottom: 12px;
   left: 12px;
 }
-.dice .right span:nth-child(5) {
+.dice .dice-right span:nth-child(5) {
   bottom: 12px;
   right: 12px;
 }
-.dice .left {
+.dice .dice-left {
   transform: rotateY(-90deg) translateZ(25px);
 }
-.dice .left span:nth-child(1) {
+.dice .dice-left span:nth-child(1) {
   top: 12px;
   right: 12px;
 }
-.dice .left span:nth-child(2) {
+.dice .dice-left span:nth-child(2) {
   bottom: 12px;
   left: 12px;
 }
-.dice .top {
+.dice .dice-top {
   transform: rotateX(90deg) translateZ(25px);
 }
-.dice .top span:nth-child(1) {
+.dice .dice-top span:nth-child(1) {
   top: 12px;
   right: 12px;
 }
-.dice .top span:nth-child(2) {
+.dice .dice-top span:nth-child(2) {
   bottom: 12px;
   left: 12px;
 }
-.dice .top span:nth-child(3) {
+.dice .dice-top span:nth-child(3) {
   bottom: 21px;
   left: 21px;
 }
-.dice .bottom {
+.dice .dice-bottom {
   transform: rotateX(-90deg) translateZ(25px);
 }
-.dice .bottom span:nth-child(1) {
+.dice .dice-bottom span:nth-child(1) {
   top: 12px;
   right: 12px;
 }
-.dice .bottom span:nth-child(2) {
+.dice .dice-bottom span:nth-child(2) {
   top: 12px;
   left: 12px;
 }
-.dice .bottom span:nth-child(3) {
+.dice .dice-bottom span:nth-child(3) {
   bottom: 12px;
   left: 12px;
 }
-.dice .bottom span:nth-child(4) {
+.dice .dice-bottom span:nth-child(4) {
   bottom: 12px;
   right: 12px;
 }

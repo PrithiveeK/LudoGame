@@ -28,13 +28,14 @@
       </div>
     </form>
     <div>
-      <FacebookLogin :app-id="process.env.FB_APP_ID" @login="FBlogin" @sdk-init="handleSDK" />
+      <FacebookLogin :app-id="fbAppId" @login="FBlogin" @sdk-init="handleSDK" />
     </div>
   </div>
 </template>
 
 <script lang="js">
 import FacebookLogin from 'vue-facebook-login-component'
+const FB_APP_ID = process.env.VUE_APP_FB_APP_ID
 
 export default {
   data () {
@@ -68,6 +69,11 @@ export default {
     },
     handleSDK({FB}) {
       this.$store.commit("User/FBinit", FB)
+    }
+  },
+  computed: {
+    fbAppId() {
+      return FB_APP_ID
     }
   },
   components: {

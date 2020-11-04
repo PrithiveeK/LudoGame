@@ -3,10 +3,12 @@
 </template>
 
 <script>
+const CLIENT_ID = process.env.PAYPAL_CLIENT_ID
+
 export default {
   mounted() {
     const script = document.createElement("script");
-    script.src = `https://www.paypal.com/sdk/js?client-id=${process.env.PAYPAL_CLIENT_ID}&currency=INR`;
+    script.src = `https://www.paypal.com/sdk/js?client-id=${CLIENT_ID}&currency=INR`;
     script.onload = this.setLoaded;
     document.body.appendChild(script);
   },

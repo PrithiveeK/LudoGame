@@ -1,20 +1,59 @@
 <template>
   <transition-group class="player" tag="div" name="piece-move">
-    <span v-for="i in 4" :key="i" :style="piecePositions[i-1]">
+    <span key="1" :style="piece1Position" class="piece-container">
       <Piece
         :class="{
           choose:
-            choosePiece &&
-            (currentDiceValue === 6 || playerState[`piece${i}`].isOut && !playerState[`piece${i}`].isHome)
+            playerState.choosePiece &&
+            (playerState.dice === 6 ||
+              playerState[`piece1`].isOut && !playerState[`piece1`].isHome && playerState[`piece1`].currentPosition + playerState.dice <= 56)
         }"
-        @click.native="moveThisPiece(i)"
+        @click.native="moveThisPiece(1)"
       />
     </span>
-    <div class="player-info" :class="{ block: !isPlaying }" :key="`playerInfo_${playerId}`">
+    <span key="2" :style="piece2Position" class="piece-container">
+      <Piece
+        :class="{
+          choose:
+            playerState.choosePiece &&
+            (playerState.dice === 6 || 
+              playerState[`piece2`].isOut && !playerState[`piece2`].isHome && playerState[`piece2`].currentPosition + playerState.dice <= 56)
+        }"
+        @click.native="moveThisPiece(2)"
+      />
+    </span>
+    <span key="3" :style="piece3Position" class="piece-container">
+      <Piece
+        :class="{
+          choose:
+            playerState.choosePiece &&
+            (playerState.dice === 6 ||
+              playerState[`piece3`].isOut && !playerState[`piece3`].isHome && playerState[`piece3`].currentPosition + playerState.dice <= 56)
+        }"
+        @click.native="moveThisPiece(3)"
+      />
+    </span>
+    <span key="4" :style="piece4Position" class="piece-container">
+      <Piece
+        :class="{
+          choose:
+            playerState.choosePiece &&
+            (playerState.dice === 6 ||
+              playerState[`piece4`].isOut && !playerState[`piece4`].isHome && playerState[`piece4`].currentPosition + playerState.dice <= 56)
+        }"
+        @click.native="moveThisPiece(4)"
+      />
+    </span>
+    <div class="player-info" :class="{ block: !isPlaying, 'show-me': isThisMe }" :key="`playerInfo_${playerId}`">
       <div class="icon">
         <div class="profile-icon"></div>
       </div>
-      <Dice :class="{ pe: isPlaying && !choosePiece }" @roll="diceRolled" />
+      <Dice
+        :class="{ pe: isThisMe && isPlaying && !playerState.choosePiece }"
+        @roll="rolling"
+        :rollDice="playerState.isRolling"
+        :diceValue="playerState.dice"
+      />
     </div>
   </transition-group>
 </template>
@@ -25,57 +64,47 @@ import Dice from "./Dice.vue";
 
 export default {
   props: ["isPlaying", "playerId"],
-  data () {
-    return {
-      choosePiece: false,
-      currentDiceValue: 0,
-      piecePositions: [{}, {}, {}, {}]
-    }
-  },
-  mounted() {
-    this.piecePositions = this.$store.getters[`${this.playerId}/defaultPiecePositions`];
-  },
   computed: {
     playerState() {
       return this.$store.state[this.playerId];
-    }
+    },
+    isThisMe() {
+      return this.$store.state.you === this.playerId;
+    },
+    piece1Position() {
+      return this.$store.getters[`${this.playerId}/piecePosition`]("piece1")
+    },
+    piece2Position() {
+      return this.$store.getters[`${this.playerId}/piecePosition`]("piece2")
+    },
+    piece3Position() {
+      return this.$store.getters[`${this.playerId}/piecePosition`]("piece3")
+    },
+    piece4Position() {
+      return this.$store.getters[`${this.playerId}/piecePosition`]("piece4")
+    },
   },
   methods: {
-    async diceRolled(event) {
-      const result = await this.$store.dispatch(`${this.playerId}/diceRolled`, {
-        dice: event
-      });
-      if (result) {
-        this.$store.commit("nextPlayer");
-      } else {
-        this.choosePiece = true;
-        this.currentDiceValue = event;
-      }
+    rolling() {
+      console.log("rolling")
+      this.$cable.perform({
+        channel: 'my_game_room',
+        action: 'rolling',
+        data: {
+          whichPlayer: this.playerId
+        }
+      })
     },
     async moveThisPiece(i) {
-      console.log("moving " + i)
-      const result = await this.$store.dispatch(`${this.playerId}/movePiece`, {
-        dice: this.currentDiceValue,
-        whichPiece: i
-      });
-      result.forEach(async (position, idx) => {
-        // await setTimeout(() => {
-        this.piecePositions.splice(i - 1, 1, position);
-        console.log(this.piecePositions[i - 1]);
-        // }, 500);
-      });
-      this.$store.commit("updatePieceInGrid", {
-        row: this.piecePositions[i - 1]["grid-row"],
-        col: this.piecePositions[i - 1]["grid-column"],
-        player: this.playerId,
-        piece: "piece" + i
+      this.$cable.perform({
+        channel: 'my_game_room',
+        action: 'move_piece',
+        data: {
+          whichPlayer: this.playerId,
+          dice: this.playerState.dice,
+          whichPiece: 'piece' + i
+        }
       })
-      console.log(result)
-      this.choosePiece = false;
-      if (this.currentDiceValue !== 6) {
-        this.$store.commit("nextPlayer");
-      }
-      this.currentDiceValue = 0;
     }
   },
   components: {
@@ -125,27 +154,11 @@ export default {
 .player {
   display: contents;
 }
-span {
+span.piece-container {
   display: grid;
   place-items: center;
 }
 .piece-move-move {
   transition: all 0.5s linear;
 }
-/* span:nth-child(1) {
-  grid-row: 1;
-  grid-column: 2;
-}
-span:nth-child(2) {
-  grid-row: 2;
-  grid-column: 1;
-}
-span:nth-child(3) {
-  grid-row: 2;
-  grid-column: 3;
-}
-span:nth-child(4) {
-  grid-row: 3;
-  grid-column: 2;
-} */
 </style>

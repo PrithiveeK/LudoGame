@@ -11,6 +11,7 @@ class Game::CreateInvitation
     def execute
         @game = Game.new(game_params)
         if @game.save
+            GameRecord.create(game_id: @game.id)
             create_invite
         else
             false
@@ -18,12 +19,12 @@ class Game::CreateInvitation
     end
 
     def create_invite
-        invite = Invite.new
-        invite.game_id = @game.id
-        invite.code = Devise.friendly_token
-        invite.created_by_id = @user.id
-        if invite.save
-            notify_players
+        @invite = Invite.new
+        @invite.game_id = @game.id
+        @invite.code = Devise.friendly_token
+        @invite.created_by_id = @user.id
+        if @invite.save
+            invite_and_notify_players
             schedule_notification if @game.scheduled_at > DateTime.now
             true
         else
@@ -31,11 +32,11 @@ class Game::CreateInvitation
         end
     end
 
-    def notify_players
-        notify @game.player1
-        notify @game.player2
-        notify @game.player3 unless @game.player3
-        notify @game.player4 unless @game.player4
+    def invite_and_notify_players
+        invite_and_notify @game.player1
+        invite_and_notify @game.player2
+        invite_and_notify @game.player3 unless @game.player3
+        invite_and_notify @game.player4 unless @game.player4
     end
 
     def schedule_notification
@@ -47,7 +48,8 @@ class Game::CreateInvitation
 
     private
 
-    def notify(player)
+    def invite_and_notify(player)
+        InvitedPlayer.create(invite_id: @invite.id, user_id: player.id)
         NotifyUserJob.perform_now(
             "You are being invited to a game by #{@user.username}",
             to_whom: player

@@ -3,23 +3,23 @@
     <div class="right-part"></div>
     <ul>
       <li class="empty"></li>
-      <li :title="'My Stats'" @click="$router.push({name: 'Home', query: {stats: 'me'}})">
+      <li title="My Stats" @click="$router.push({name: 'Home', query: {stats: 'me'}})">
         <span>My Stats</span>
         <i></i>
       </li>
-      <li :title="'Leader Board'" @click="$router.push({name: 'Home', query: {stats: 'all'}})">
+      <li title="Leader Board" @click="$router.push({name: 'Home', query: {stats: 'all'}})">
         <span>Leader Board</span>
         <i></i>
       </li>
-      <li :title="'Invite'" @click="$emit('invite')">
+      <li title="Invite" @click="$emit('invite')">
         <span>Invite</span>
         <i></i>
       </li>
-      <li :title="'Random Play'">
-        <span>Ramdom Play</span>
+      <li title="Manage Invites" @click="$emit('view-invites')">
+        <span>Manage Invites</span>
         <i></i>
       </li>
-      <li :title="'Saved Games'">
+      <li title="Saved Games">
         <span>Saved Games</span>
         <i></i>
       </li>

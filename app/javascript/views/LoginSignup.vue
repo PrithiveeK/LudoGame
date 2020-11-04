@@ -1,8 +1,8 @@
 <template>
   <div class="page">
     <div class="page-component" :class="{ 'flip-component': signup }">
-      <Login class="component front" @signup="signup = true" @submit="loginUser" @facebook="oauthSignin" />
-      <Signup class="component back" @login="signup = false" @submit="signupUser" />
+      <Login class="component front-side" @signup="signup = true" @submit="loginUser" @facebook="oauthSignin" />
+      <Signup class="component back-side" @login="signup = false" @submit="signupUser" />
     </div>
     <Error :errorObj="isError" v-if="isError.has" />
   </div>
@@ -102,17 +102,17 @@ export default {
   place-items: center;
   color: whitesmoke;
 }
-.front {
+.front-side {
   pointer-events: all;
 }
-.back {
+.back-side {
   transform: rotateX(180deg);
   pointer-events: none;
 }
-.flip-component > .front {
+.flip-component > .front-side {
   pointer-events: none;
 }
-.flip-component > .back {
+.flip-component > .back-side {
   pointer-events: all;
 }
 .change-component {

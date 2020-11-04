@@ -8,6 +8,8 @@ require 'carrierwave/orm/activerecord'
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
+Dotenv::Railtie.load
+
 
 module Ludo
   class Application < Rails::Application
@@ -21,8 +23,8 @@ module Ludo
     config.active_job.queue_adapter = :sidekiq
 
     # To integrate OmniAuth into a Rails API.
-    config.session_store :cookie_store, key: '_interslice_session'
-    config.middleware.use ActionDispatch::Cookies
-    config.middleware.use ActionDispatch::Session::CookieStore, config.session_options
+    # config.session_store :cookie_store, key: '_interslice_session'
+    # config.middleware.use ActionDispatch::Cookies
+    # config.middleware.use ActionDispatch::Session::CookieStore, config.session_options
   end
 end

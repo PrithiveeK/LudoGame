@@ -6,7 +6,11 @@ const state = {
   loggedIn: false,
   currentUser: {},
   allUsers: [],
-  FB: {}
+  FB: {
+    logout: function() {
+      return
+    }
+  }
 }
 
 const getters = {
@@ -103,6 +107,10 @@ const actions = {
     }
   },
   SIGNOUT(ctx) {
+    fetch("/users/sign_out", {
+      method: "DELETE",
+      'Authorization': `Bearer ${localStorage.getItem("liu")}`
+    }).catch(err => console.log(err))
     localStorage.removeItem("liu")
     ctx.commit("signOutUser")
   },

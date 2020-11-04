@@ -18,7 +18,7 @@
         </div>
       </div>
       <ul class="notification-list noscroll">
-        <li class="notification" v-for="notification in allNotifications" :key="notification">{{ notification }}</li>
+        <li class="notification" v-for="(notification, i) in allNotifications" :key="i">{{ notification }}</li>
       </ul>
     </div>
     <div class="icon">
@@ -61,7 +61,6 @@ export default {
         console.log("disconnected");
       },
       received(data) {
-        console.log(data);
         this.haveNotifications = true
         this.allNotifications.unshift(data.message)
       },

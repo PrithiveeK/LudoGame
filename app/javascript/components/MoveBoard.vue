@@ -36,10 +36,93 @@ export default {
     PlayerManager,
     Piece
   },
+  channels: {
+    my_game_room: {
+      connected() {
+        console.log("subscribed to Game")
+      },
+      disconnected() {
+        console.log("disconnected from Game")
+      },
+      received(data) {
+        console.log(data)
+        if(data.action === "move_piece") {
+        }
+        switch(data.action) {
+          case "rolling": this.rolling(data.payload);break;
+          case "dice_rolled": this.diceRolled(data.payload);break;
+          case "move_piece": this.movePiece(data.payload);break;
+          case "next_player": this.nextPlayer(data.payload);break;
+          case "start": this.startGame(data.payload);break;
+          case "end": this.endGame();break;
+        }
+      },
+      rejected() {
+        console.log("You don't belong here")
+      }
+    }
+  },
   computed: {
     currentPlayer() {
       return this.$store.state.currentPlayer;
     }
+  },
+  methods: {
+    subscribeToGame() {
+      const game_code = this.$route.query.code
+      if (!game_code) {
+        this.$store.commit("mode", false)
+        return
+      }
+      this.$store.commit("mode", true)
+      this.$cable.subscribe({
+        channel: "GameChannel",
+        room: game_code
+      }, 'my_game_room')
+    },
+    rolling(payload) {
+      this.$store.commit(`${payload.whichPlayer}/roll`, true)
+    },
+    diceRolled(payload) {
+      setTimeout(() => {
+        this.$store.commit(`${payload.whichPlayer}/rollDice`, payload.dice)
+        this.$store.dispatch(`${payload.whichPlayer}/diceRolled`, {
+          dice: payload.dice
+        }).then(result => {
+          if (result) {
+            this.$cable.perform({
+              channel: 'my_game_room',
+              action: 'next_player',
+              data: {
+                currentPlayer: payload.whichPlayer
+              }
+            })
+          } else {
+            this.$store.commit(`${payload.whichPlayer}/choosePiece`, true)
+          }
+        })
+      }, 1000);
+    },
+    movePiece(payload) {
+      console.log("moving " + payload.whichPiece)
+      this.$store.dispatch(`movePiece`, payload);
+      this.$store.commit(`${payload.whichPlayer}/choosePiece`, false)
+    },
+    nextPlayer(payload) {
+      this.$store.dispatch("nextPlayer", payload.currentPlayer);
+    },
+    startGame(payload) {
+      this.$store.commit("startGame", payload)
+    },
+    endGame() {
+      this.$store.commit("endGame")
+    }
+  },
+  mounted() {
+    this.subscribeToGame()
+  },
+  destroyed() {
+    this.$cable.unsubscribe('my_game_room')
   }
 }
 </script>
@@ -88,24 +171,49 @@ export default {
   display: flex;
   border-radius: 12px;
 }
+.show-me:after {
+  content: "YOU";
+  position: absolute;
+  padding: 10px;
+  font-size: 20px;
+  background-color: white;
+  border-radius: 8px;
+  margin: 10px;
+}
 #Player1 .player-info {
   bottom: 100%;
   left: 0;
   flex-direction: row;
+}
+#Player1 .show-me:after {
+  bottom: 100%;
+  left: 0;
 }
 #Player2 .player-info {
   bottom: 100%;
   right: 0;
   flex-direction: row-reverse;
 }
+#Player2 .show-me:after {
+  bottom: 100%;
+  right: 0;
+}
 #Player3 .player-info {
   top: 100%;
   right: 0;
   flex-direction: row-reverse;
 }
+#Player3 .show-me:after {
+  top: 100%;
+  right: 0;
+}
 #Player4 .player-info {
   top: 100%;
   left: 0;
   flex-direction: row;
+}
+#Player4 .show-me:after {
+  top: 100%;
+  left: 0;
 }
 </style>

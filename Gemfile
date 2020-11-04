@@ -62,5 +62,5 @@ gem 'sidekiq'
 gem 'omniauth-facebook'
 gem 'koala'
 gem 'cancancan'
-gem 'dotenv-rails'
+gem 'dotenv-rails', groups: [:development, :test]
 # gem 'paypal-sdk-rest'
