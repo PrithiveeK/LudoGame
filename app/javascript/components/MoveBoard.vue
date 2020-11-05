@@ -46,13 +46,14 @@ export default {
       },
       received(data) {
         console.log(data)
-        if(data.action === "move_piece") {
-        }
         switch(data.action) {
           case "rolling": this.rolling(data.payload);break;
           case "dice_rolled": this.diceRolled(data.payload);break;
           case "move_piece": this.movePiece(data.payload);break;
+          case "kill_piece": this.killPiece(data,payload);break;
           case "next_player": this.nextPlayer(data.payload);break;
+          case "player_info": this.setPlayerInfo(data.payload);break;
+          case "player_home": this.setPlayerHome(data.payload);break;
           case "start": this.startGame(data.payload);break;
           case "end": this.endGame();break;
         }
@@ -70,11 +71,6 @@ export default {
   methods: {
     subscribeToGame() {
       const game_code = this.$route.query.code
-      if (!game_code) {
-        this.$store.commit("mode", false)
-        return
-      }
-      this.$store.commit("mode", true)
       this.$cable.subscribe({
         channel: "GameChannel",
         room: game_code
@@ -105,14 +101,33 @@ export default {
     },
     movePiece(payload) {
       console.log("moving " + payload.whichPiece)
-      this.$store.dispatch(`movePiece`, payload);
+      this.$store.dispatch(`movePiece`, payload).then(() => {
+        if (payload.dice !== 6) {
+          this.$cable.perform({
+            channel: 'my_game_room',
+            action: 'next_player',
+            data: {
+              currentPlayer: payload.whichPlayer
+            }
+          })
+        }
+      });
       this.$store.commit(`${payload.whichPlayer}/choosePiece`, false)
     },
+    killPiece(payload) {
+      this.$store.commit(`${payload.whichPlayer}/killPiece`, payload.whichPiece)
+    },
     nextPlayer(payload) {
-      this.$store.dispatch("nextPlayer", payload.currentPlayer);
+      this.$store.commit("nextPlayer", payload.nextPlayer);
+    },
+    setPlayerInfo(payload) {
+      this.$store.commit("setPlayerInfo", payload)
+    },
+    setPlayerHome(payload){
+      this.$store.commit('incrementFinishedPlayers', payload.whichPlayer)
     },
     startGame(payload) {
-      this.$store.commit("startGame", payload)
+      this.$store.dispatch("setGame", payload)
     },
     endGame() {
       this.$store.commit("endGame")

@@ -14,7 +14,7 @@ class RegistrationsController < Devise::RegistrationsController
     protected
 
     def after_sign_up_path_for(resource)
-        UserRecord.create!(user_id: resource.id) unless resource.user_record
+        UserRecord.create!(user_id: resource.id, is_online: true) unless resource.user_record
         super
     end
 
@@ -22,6 +22,7 @@ class RegistrationsController < Devise::RegistrationsController
 
     def respond_with(resource, _opts = {})
         @user = resource
+        @user.user_record = UserRecord.find_by(user_id: @user.id)
         render :created
     end
 end

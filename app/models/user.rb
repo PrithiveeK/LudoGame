@@ -7,10 +7,10 @@ class User < ApplicationRecord
   omniauth_providers: [:facebook]
   
   has_one :user_record
-  has_many :games, dependent: :nullify
+  has_many :created_games, dependent: :nullify, :class_name => "Game", :foreign_key => "created_by_id"
   validates :username, presence: true
-  has_many :invites, :class_name => "Invite", :foreign_key => "created_by_id"
-  has_many :invited_players
+  has_many :game_records, :class_name => "GameRecord", :foreign_key => "player_id"
+  has_many :games, :class_name => "Game", through: :game_records
   has_many :orders
   has_many :products, through: :orders
 
@@ -23,11 +23,11 @@ class User < ApplicationRecord
   end
 
   def can_access_game?(code)
-    return Invite.find_by_code(code)&.game&.am_i_a_player?(self.id)
+    return games.find_by_code(code)
   end
 
-  def find_invite_by_code(code)
-    invited_players.find_by invite: Invite.find_by_code(code)
+  def find_next_game(time)
+    games.where("scheduled_at < ? and join_window > ?", time, time).first
   end
 
 end

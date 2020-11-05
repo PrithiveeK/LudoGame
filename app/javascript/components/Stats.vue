@@ -9,7 +9,7 @@
     <transition-group name="fade" tag="div" class="table-container">
       <Table
         v-if="display === 'me'"
-        :tHead="['S.No', 'Against', 'Result', 'Points']"
+        :tHead="['S.No', 'Room Name', 'Result']"
         :lookUp="'my_stats'"
         key="me"
       />

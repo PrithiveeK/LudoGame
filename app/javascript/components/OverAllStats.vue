@@ -8,14 +8,6 @@
       <ProgressBar :points="points" />
       <span>Points</span>
     </article>
-    <article>
-      <ProgressBar :points="10" />
-      <span>Rank</span>
-    </article>
-    <article>
-      <ProgressBar :points="20" />
-      <span>Players Online</span>
-    </article>
   </section>
 </template>
 

@@ -10,6 +10,10 @@ class GameChannel < ApplicationCable::Channel
   def move_piece(data)
     @game_room.move_piece(data)
   end
+  
+  def kill_piece(data)
+    @game_room.kill_piece(data)
+  end
 
   def next_player(data)
     @game_room.next_player(data)
@@ -19,7 +23,10 @@ class GameChannel < ApplicationCable::Channel
     @game_room.roll_dice(data)
   end
 
+  def save_game
+    @game_room.save_game
+  end
   def unsubscribed
-    # Any cleanup needed when channel is unsubscribed
+    stop_all_streams
   end
 end

@@ -21,9 +21,6 @@
         <li class="notification" v-for="(notification, i) in allNotifications" :key="i">{{ notification }}</li>
       </ul>
     </div>
-    <div class="icon">
-      <div class="search-icon"></div>
-    </div>
     <div class="icon" @click="$emit('settings')">
       <div class="gear"></div>
     </div>
@@ -144,7 +141,7 @@ header {
   display: flex;
   align-items: center;
   color: white;
-  padding: 0 10px;
+  padding: 5px 10px;
 }
 .icon-container {
   height: 100%;

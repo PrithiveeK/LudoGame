@@ -6,7 +6,8 @@
           choose:
             playerState.choosePiece &&
             (playerState.dice === 6 ||
-              playerState[`piece1`].isOut && !playerState[`piece1`].isHome && playerState[`piece1`].currentPosition + playerState.dice <= 56)
+              playerState[`piece1`].isOut && !playerState[`piece1`].isHome && playerState[`piece1`].currentPosition + playerState.dice <= 56),
+          pe: isThisMe
         }"
         @click.native="moveThisPiece(1)"
       />
@@ -17,7 +18,8 @@
           choose:
             playerState.choosePiece &&
             (playerState.dice === 6 || 
-              playerState[`piece2`].isOut && !playerState[`piece2`].isHome && playerState[`piece2`].currentPosition + playerState.dice <= 56)
+              playerState[`piece2`].isOut && !playerState[`piece2`].isHome && playerState[`piece2`].currentPosition + playerState.dice <= 56),
+          pe: isThisMe
         }"
         @click.native="moveThisPiece(2)"
       />
@@ -28,7 +30,8 @@
           choose:
             playerState.choosePiece &&
             (playerState.dice === 6 ||
-              playerState[`piece3`].isOut && !playerState[`piece3`].isHome && playerState[`piece3`].currentPosition + playerState.dice <= 56)
+              playerState[`piece3`].isOut && !playerState[`piece3`].isHome && playerState[`piece3`].currentPosition + playerState.dice <= 56),
+          pe: isThisMe
         }"
         @click.native="moveThisPiece(3)"
       />
@@ -39,7 +42,8 @@
           choose:
             playerState.choosePiece &&
             (playerState.dice === 6 ||
-              playerState[`piece4`].isOut && !playerState[`piece4`].isHome && playerState[`piece4`].currentPosition + playerState.dice <= 56)
+              playerState[`piece4`].isOut && !playerState[`piece4`].isHome && playerState[`piece4`].currentPosition + playerState.dice <= 56),
+          pe: isThisMe
         }"
         @click.native="moveThisPiece(4)"
       />
@@ -68,8 +72,11 @@ export default {
     playerState() {
       return this.$store.state[this.playerId];
     },
+    isOffline() {
+      return !this.$store.state.onlineMode
+    },
     isThisMe() {
-      return this.$store.state.you === this.playerId;
+      return this.$store.state.you === this.playerId || this.isOffline;
     },
     piece1Position() {
       return this.$store.getters[`${this.playerId}/piecePosition`]("piece1")
@@ -120,7 +127,6 @@ export default {
 }
 .choose {
   transform: scale(1.15);
-  pointer-events: all;
   z-index: 500;
 }
 .icon {

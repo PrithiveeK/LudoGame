@@ -35,15 +35,18 @@
         <button type="submit" class="game-btn">Proceed</button>
       </form>
     </Popup>
+    <Error v-if="isError.has" :errorObj="isError" />
   </section>
 </template>
 
 <script>
 import Popup from './Popup.vue'
+import Error from './Error.vue'
 
 export default {
   data () {
     return {
+      isError: {has: false, msg: '', color: ''},
       canIEdit: false,
       confirmYourPassword: false,
       username: {
@@ -134,11 +137,21 @@ export default {
         password_confirmation: this.confirm_password.value,
         current_password: this.current_password.value
       };
-      console.log(reqBody)
+      this.$store.dispatch("User/UPDATE", reqBody).then(result => {
+        if (result === "") {
+          this.isError = {has: true, msg: 'Successfully Updated!', color: 'green'}
+        } else {
+          this.isError = {has: true, msg: result, color: 'red'}
+        }
+        setTimeout(() => {
+          this.isError = {has: false, msg: '', color: ''}
+        }, 3000)
+      })
     }
   },
   components: {
-    Popup
+    Popup,
+    Error
   }
 }
 </script>

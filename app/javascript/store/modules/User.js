@@ -89,6 +89,30 @@ const actions = {
       return "Something went wrong, Please try again!"
     }
   },
+  async UPDATE(ctx, payload) {
+    try {
+      const response = await fetch("/users", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("liu")}`
+        },
+        body: JSON.stringify({ user: payload })
+      })
+      const data = await response.json()
+      // const token = response.headers.get("authorization");
+      if (data.id) {
+        // setToken(token)
+        ctx.commit("signInUser", data)
+        return ""
+      } else {
+        return "Couldn't update user info"
+      }
+    } catch (error) {
+      console.log(error);
+      return "Something went wrong, Please try again!"
+    }
+  },
   async OAUTH(ctx, payload) {
     try {
       const response = await fetch("api/users/auth/facebook?access_token=" + payload)

@@ -7,13 +7,15 @@ Rails.application.routes.draw do
   
   namespace :api, defaults: { format: :json } do
     resources :users, only: [:index] do 
-      put 'avatar', to: 'users#update_avatar'
+      put 'avatar', to: 'user_records#update_avatar'
     end
     get 'users/auth/facebook', to: 'users#facebook'
     get '/users/verify', to: 'users#verify'
-    resources :invites, only: [:index]
-    get 'invites/today', to: 'invites#now'
+    get 'users/leaderboard', to: 'user_records#leaderboard'
+    get 'users/my_stats', to: 'user_records#my_stats'
     resources :games, only: [:create]
+    get 'games/now', to: 'games#now'
+    get 'game/invites', to: 'games#invites'
     resources :products, only: [:index]
   end
   

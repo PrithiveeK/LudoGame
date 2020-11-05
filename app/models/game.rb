@@ -1,49 +1,46 @@
 class Game < ApplicationRecord
-  belongs_to :player1, :class_name => "User"
-  belongs_to :player2, :class_name => "User"
-  belongs_to :player3, :class_name => "User"
-  belongs_to :player4, :class_name => "User"
-  has_one :invite, dependent: :nullify
-  has_many :invited_players, through: :invite
-  has_one :game_record
-  has_many :move_records
+  has_many :game_records
+  belongs_to :created_by, :class_name => "User"
 
-  def am_i_a_player?(id)
-    return self.player1_id == id || self.player2_id == id || self.player3_id == id || self.player4_id == id
+  scope :finished, -> { where(status: 'FINISHED') }
+  scope :active, -> { where(status: 'ACTIVE')  }
+  scope :online_mode, -> { where("room != ?", "self")  }
+  scope :offline_mode, -> { where("room = ?", "self")  }
+
+  def self.find_invites(user_id)
+    where(created_by_id: user_id).online_mode
   end
 
-  def which_player(id)
-    return "Player1" if self.player1_id == id
-    return "Player2" if self.player2_id == id
-    return "Player3" if self.player3_id == id
-    return "Player4" if self.player4_id == id
-    return nil
+  def players_game_record(id)
+    game_records.find_by_player_id(id)
   end
 
   def no_of_players
-    invited_players.count
-  end
-
-  def has_finished(player)
-    case player
-    when "Player1"
-      self.player1_id == nil || self.game_record.player1 != nil
-    when "Player2"
-      self.player2_id == nil || self.game_record.player2 != nil
-    when "Player3"
-      self.player3_id == nil || self.game_record.player3 != nil || true
-    when "Player4"
-      self.player4_id == nil || self.game_record.player4 != nil || true
-    end
+    game_records.count
   end
 
   def no_of_players_finished
-    count = 0
-    count = count + 1 if self.has_finished("Player1")
-    count = count + 1 if self.has_finished("Player2")
-    count = count + 1 if self.has_finished("Player3")
-    count = count + 1 if self.has_finished("Player4")
-    count
+    game_records.finished_players
+  end
+
+  def player_joined!(player_id)
+    self.game_records.find_by_player_id(player_id)&.update_attribute(:has_joined, true)
+  end
+
+  def join_all!
+    self.game_records.update_all(:has_joined => true)
+  end
+
+  def can_start?
+    game_records.all_joined?
+  end
+
+  def game_players
+    game_records.who_are_playing
+  end
+
+  def this_player(which_player)
+    game_records.find_by(which_player: which_player)
   end
 
 end

@@ -10,69 +10,45 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_11_04_165625) do
+ActiveRecord::Schema.define(version: 2020_11_05_170341) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "game_records", id: false, force: :cascade do |t|
+  create_table "game_records", force: :cascade do |t|
     t.bigint "game_id", null: false
-    t.string "player1"
-    t.string "player2"
-    t.string "player3"
-    t.string "player4"
-    t.boolean "is_saved", default: false
+    t.bigint "player_id", null: false
+    t.string "place"
+    t.boolean "has_joined", default: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "which_player"
     t.index ["game_id"], name: "index_game_records_on_game_id"
+    t.index ["player_id"], name: "index_game_records_on_player_id"
   end
 
   create_table "games", force: :cascade do |t|
     t.string "room", null: false
-    t.bigint "player1_id", null: false
-    t.bigint "player2_id", null: false
-    t.bigint "player3_id"
-    t.bigint "player4_id"
-    t.datetime "scheduled_at"
-    t.string "status", default: "ACTIVE"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.datetime "join_window"
-    t.index ["player1_id"], name: "index_games_on_player1_id"
-    t.index ["player2_id"], name: "index_games_on_player2_id"
-    t.index ["player3_id"], name: "index_games_on_player3_id"
-    t.index ["player4_id"], name: "index_games_on_player4_id"
-  end
-
-  create_table "invited_players", force: :cascade do |t|
-    t.bigint "invite_id", null: false
-    t.bigint "user_id", null: false
-    t.boolean "claimed", default: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["invite_id"], name: "index_invited_players_on_invite_id"
-    t.index ["user_id"], name: "index_invited_players_on_user_id"
-  end
-
-  create_table "invites", force: :cascade do |t|
     t.string "code", null: false
-    t.bigint "game_id", null: false
+    t.datetime "scheduled_at"
+    t.datetime "join_window"
+    t.boolean "is_saved", default: false
     t.string "status", default: "ACTIVE"
     t.bigint "created_by_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["created_by_id"], name: "index_invites_on_created_by_id"
-    t.index ["game_id"], name: "index_invites_on_game_id"
+    t.integer "current_player", default: 1
+    t.index ["created_by_id"], name: "index_games_on_created_by_id"
   end
 
   create_table "move_records", force: :cascade do |t|
-    t.bigint "game_id", null: false
+    t.bigint "game_record_id", null: false
     t.string "player"
     t.string "piece"
-    t.integer "die"
+    t.integer "last_position"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["game_id"], name: "index_move_records_on_game_id"
+    t.index ["game_record_id"], name: "index_move_records_on_game_record_id"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -88,8 +64,8 @@ ActiveRecord::Schema.define(version: 2020_11_04_165625) do
   create_table "products", force: :cascade do |t|
     t.string "name", null: false
     t.string "price", default: "0"
-    t.string "currency", default: "USD"
-    t.string "status", default: "ACTIVE"
+    t.string "currency", default: "INR"
+    t.string "status", default: "FREE"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
@@ -103,6 +79,7 @@ ActiveRecord::Schema.define(version: 2020_11_04_165625) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "avatar"
+    t.integer "default_piece_id", default: 1, null: false
     t.index ["user_id"], name: "index_user_records_on_user_id"
   end
 
@@ -119,18 +96,13 @@ ActiveRecord::Schema.define(version: 2020_11_04_165625) do
     t.string "uid"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["username"], name: "index_users_on_username", unique: true
   end
 
   add_foreign_key "game_records", "games"
-  add_foreign_key "games", "users", column: "player1_id"
-  add_foreign_key "games", "users", column: "player2_id"
-  add_foreign_key "games", "users", column: "player3_id"
-  add_foreign_key "games", "users", column: "player4_id"
-  add_foreign_key "invited_players", "invites"
-  add_foreign_key "invited_players", "users"
-  add_foreign_key "invites", "games"
-  add_foreign_key "invites", "users", column: "created_by_id"
-  add_foreign_key "move_records", "games"
+  add_foreign_key "game_records", "users", column: "player_id"
+  add_foreign_key "games", "users", column: "created_by_id"
+  add_foreign_key "move_records", "game_records"
   add_foreign_key "orders", "products"
   add_foreign_key "orders", "users"
   add_foreign_key "user_records", "users"

@@ -65,6 +65,19 @@ const getters = {
 };
 
 const mutations = {
+  setPiecePositions(state, payload) {
+    for(let [key, value] of Object.entries(payload)) {
+      state[key].currentPosition = value
+      if (value > -1) {
+        state[key].isOut = true
+        ++state.noOfPiecesOut
+      }
+      if (value === 56) {
+        state[key].isHome = true
+        ++state.noOfPiecesHome
+      }
+    }
+  },
   choosePiece(state, choose) {
     state.choosePiece = choose
   },

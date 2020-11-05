@@ -10,8 +10,8 @@
       <div class="joining-window" v-if="isOnlineMode && !isStarted">Waiting for the Players to Join...</div>
     </transition>
     <div class="score-board" v-if="isFinished">
-      <ul>
-        <li v-for="player in scoreBoard" :key="player">{{player}}</li>
+      <ul class="score-board-list">
+        <li v-for="player in scoreBoard" :key="player" class="score-board-item">{{player}}</li>
       </ul>
     </div>
   </div>
@@ -172,5 +172,20 @@ export default {
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 1s ease;
+}
+.score-board {
+  position: fixed;
+  width: 100%;
+  padding: 20px;
+  left: 0;
+  bottom: 0;
+}
+.score-board-list{
+  border-radius: 20px 20px 0 0;
+  background-color: #0075ff;
+}
+.score-board-item {
+  border-bottom: 2px solid white;
+  font-size: 32px;
 }
 </style>

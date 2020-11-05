@@ -45,15 +45,15 @@ export default new Vuex.Store({
     onlineMode: false
   },
   mutations: {
-    mode(state, isOnline) {
-      state.onlineMode = isOnline
-    },
-    startGame(state, payload) {
+    startGame(state) {
       state.isStarted = true
+    },
+    setPlayerInfo(state, payload) {
       state.you = payload.you
       state.noOfPlayers = payload.noOfPlayers
       state.noOfPlayersFinished = payload.noOfPlayersFinished
       state.currentPlayer = payload.currentPlayer
+      state.onlineMode = payload.onlineMode
     },
     incrementFinishedPlayers(state, who) {
       state.scoreBoard.push(who)
@@ -85,8 +85,11 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    setPiecePositions() {
-      //... Yet to complete
+    setGame(ctx, payload) {
+      ctx.commit("startGame")
+      for (let [key, value] of Object.entries(payload)) {
+        ctx.commit(`${key}/setPiecePositions`, value)
+      }
     },
     nextPlayer(ctx, whichPlayer) {
       let nxtPlayer = 0
@@ -117,16 +120,15 @@ export default new Vuex.Store({
       if (position.count !== 0 && position.canKill) {
         position.pieces.filter(piece => piece.player !== payload.whichPlayer).forEach(piece => {
           console.log(`${payload.whichPlayer} killed ${piece.player}'s ${piece.piece}`)
-          ctx.commit(`${piece.player}/killPiece`, piece.piece)
+          Vue.prototype.$cable.perform({
+            channel: 'my_game_room',
+            action: 'kill_piece',
+            data: {
+              whichPlayer: piece.player,
+              whichPiece: piece.piece
+            }
+          })
         })
-      }
-      if (ctx.state[payload.whichPlayer].noOfPiecesHome === 4) {
-        ctx.commit('incrementFinishedPlayers', payload.whichPlayer)
-      }
-      if (ctx.state.noOfPlayersFinished === ctx.state.noOfPlayers) {
-        ctx.commit('endGame')
-      } else if (payload.dice !== 6) {
-        ctx.dispatch("nextPlayer", payload.whichPlayer)
       }
     }
   },

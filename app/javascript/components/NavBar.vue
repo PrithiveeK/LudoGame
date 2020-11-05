@@ -15,8 +15,8 @@
         <span>Invite</span>
         <i></i>
       </li>
-      <li title="Manage Invites" @click="$emit('view-invites')">
-        <span>Manage Invites</span>
+      <li title="Created Invites" @click="$emit('view-invites')">
+        <span>Created Invites</span>
         <i></i>
       </li>
       <li title="Saved Games">

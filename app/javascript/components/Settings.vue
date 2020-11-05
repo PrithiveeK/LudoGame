@@ -21,7 +21,12 @@
         <ul class="piece-list">
           <li class="loading" v-if="loading"></li>
           <template v-else>
-            <li v-for="piece in pieces" :key="piece.id" class="piece-item purchase" @click="payForProduct = true">
+            <li
+              v-for="piece in pieces"
+              :key="piece.id" class="piece-item"
+              :class="{purchase: piece.status === 'PURCHASE'}"
+              @click="clickedProduct(piece)"
+            >
               <i :class="piece.name" v-for="i in 4" :key="i"></i>
             </li>
           </template>
@@ -46,7 +51,9 @@ export default {
     return {
       payForProduct: false,
       loading: true,
-      pieces: []
+      pieces: [],
+      selectedPiece: {},
+      setDefault: false
     }
   },
   methods: {
@@ -64,6 +71,14 @@ export default {
           }
         })
         .catch(err => console.log(err))
+    },
+    clickedProduct: function(piece) {
+      this.selectedPiece = piece
+      if (piece.status === "PURCHASE"){
+        this.payForProduct = true
+      } else {
+        this.setDefault = true
+      }
     }
   },
   components: {

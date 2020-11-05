@@ -6,14 +6,49 @@
       </tr>
     </thead>
     <tbody class="noscroll">
-      <tr v-for="i in 20" :key="i"></tr>
+      <tr v-for="(row, i) in rows" :key="i">
+        <td>{{ i + 1 }}</td>
+        <td v-for="key in tdKeys" :key="key">{{ row[key] }}</td>
+      </tr>
     </tbody>
   </table>
 </template>
 
 <script lang="js">
 export default {
-  props: ["tHead", "lookUp"]
+  props: ["tHead", "lookUp"],
+  data () {
+    return {
+      rows: [],
+      allKeys: {
+        my_stats: ['room', 'place'],
+        leaderboard: ['username', 'points']
+      }
+    }
+  },
+  mounted() {
+    this.fetchData()
+  },
+  computed: {
+    tdKeys() {
+      return this.allKeys[this.lookUp]
+    }
+  },
+  methods: {
+    fetchData() {
+      fetch(`/api/users/${this.lookUp}`, {
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("liu")}`
+        }
+      }).then(res => res.json())
+        .then(data => {
+          if (data.code === 200) {
+            this.rows = data.records
+          }
+        })
+        .catch(err => err)
+    }
+  }
 }
 </script>
 
@@ -23,8 +58,6 @@ table {
   background-color: #0050a0;
   border-radius: 8px;
   margin-top: 12vh;
-}
-thead > tr {
   color: white;
 }
 tbody {
@@ -37,6 +70,7 @@ tr {
   table-layout: fixed;
   width: 100%;
   height: 50px;
+  text-align: center;
 }
 tr {
   border-bottom: 2px solid #fff;

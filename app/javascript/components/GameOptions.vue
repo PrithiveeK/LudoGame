@@ -1,9 +1,54 @@
 <template>
   <div class="options">
-    <div class="icon exit" @click="$router.push({ name: 'Home' })"></div>
-    <div class="icon chat"></div>
+    <div class="icon exit" @click="initClose"></div>
+    <Popup :showMe="warn">
+      <template>
+        <span>Save the process?</span>
+        <button class="game-btn" @click="saveAndClose">Save</button>
+        <button class="game-btn" @click="close">Don't Save</button>
+      </template>
+    </Popup>
   </div>
 </template>
+
+<script>
+import Popup from './Popup.vue'
+
+export default {
+  data() {
+    return {
+      warn: false
+    }
+  },
+  computed: {
+    isOffline() {
+      return !this.$store.state.onlineMode
+    }
+  },
+  methods: {
+    initClose() {
+      if (this.isOffline) {
+        this.warn = true
+      } else {
+        this.close()
+      }
+    },
+    close() {
+      this.$router.push({ name: 'Home' })
+    },
+    saveAndClose() {
+      this.$cable.perform({
+        channel: 'my_game_room',
+        action: 'save_game'
+      })
+      this.close()
+    }
+  },
+  components: {
+    Popup
+  }
+}
+</script>
 
 <style scoped>
 .options {

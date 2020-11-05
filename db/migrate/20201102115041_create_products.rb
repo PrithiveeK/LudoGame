@@ -3,8 +3,8 @@ class CreateProducts < ActiveRecord::Migration[6.0]
     create_table :products do |t|
       t.string :name, null: false
       t.string :price, :default => "0"
-      t.string :currency, :default => "USD"
-      t.string :status, :default => 'ACTIVE'
+      t.string :currency, :default => "INR"
+      t.string :status, :default => 'FREE'
 
       t.timestamps
     end
