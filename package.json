@@ -18,7 +18,8 @@
     "vue-router": "^3.4.8",
     "vue-template-compiler": "^2.6.12",
     "vue-turbolinks": "^2.1.0",
-    "vuex": "^3.5.1"
+    "vuex": "^3.5.1",
+    "webpacker": "^4.6.0"
   },
   "version": "0.1.0",
   "devDependencies": {
