@@ -63,7 +63,7 @@ class Game::JoinStart
             {
                 whichPlayer: data["whichPlayer"],
                 whichPiece: data["whichPiece"],
-                dice: @dice_value
+                dice: @dice_value,
                 nextPlayer: next_player
             },
             to_where: @room_channel
@@ -124,7 +124,7 @@ class Game::JoinStart
         GameCommsJob.perform_now(
             "end",
             nil,
-            to_where: @room_channel,
+            to_where: @room_channel
         )
     end
 
