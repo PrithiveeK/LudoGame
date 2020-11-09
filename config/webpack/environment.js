@@ -4,6 +4,7 @@ const { VueLoaderPlugin } = require('vue-loader')
 const dotenv = require('dotenv')
 const vue = require('./loaders/vue')
 const css = require('./loaders/css')
+const url = require('./loaders/url')
 
 dotenv.config({path: '.env', silent: true})
 // environment.plugins.prepend('Environment', new webpack.EnvironmentPlugin(JSON.parse(JSON.stringify(process.env))))
