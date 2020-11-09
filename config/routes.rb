@@ -13,9 +13,8 @@ Rails.application.routes.draw do
     get '/users/verify', to: 'users#verify'
     get 'users/leaderboard', to: 'user_records#leaderboard'
     get 'users/my_stats', to: 'user_records#my_stats'
-    resources :games, only: [:create]
+    resources :games, only: [:index, :create]
     get 'games/now', to: 'games#now'
-    get 'game/invites', to: 'games#invites'
     resources :products, only: [:index]
   end
   

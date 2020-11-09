@@ -1,4 +1,15 @@
 class Api::GamesController < ApplicationController
+    # load_and_authorize_resource only: [:index]
+
+    def index
+        if params[:type] == "invites"
+            @games = Game.online_mode
+        elsif params[:type] == "saved"
+            @games = Game.offline_mode
+        end            
+        authorize! :read, @games
+        render :index
+    end
 
     def create
         @curr_user = current_user
@@ -8,11 +19,6 @@ class Api::GamesController < ApplicationController
         else
             render json: {done: false}
         end
-    end
-
-    def invites
-        @invites = Game.find_invites(current_user.id)
-        render :invites
     end
 
     def now

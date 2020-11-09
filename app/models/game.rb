@@ -1,15 +1,12 @@
 class Game < ApplicationRecord
   has_many :game_records
+  has_many :move_records, through: :game_records
   belongs_to :created_by, :class_name => "User"
 
   scope :finished, -> { where(status: 'FINISHED') }
   scope :active, -> { where(status: 'ACTIVE')  }
   scope :online_mode, -> { where("room != ?", "self")  }
   scope :offline_mode, -> { where("room = ?", "self")  }
-
-  def self.find_invites(user_id)
-    where(created_by_id: user_id).online_mode
-  end
 
   def players_game_record(id)
     game_records.find_by_player_id(id)

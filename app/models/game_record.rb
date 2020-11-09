@@ -3,12 +3,16 @@ class GameRecord < ApplicationRecord
   belongs_to :player, :class_name => "User"
   has_many :move_records
 
+  scope :finished, -> { where("not place isnull")}
+  scope :not_finished, -> { where("place isnull")}
+  # Ex:- scope :active, -> {where(:active => true)}
+
   def self.all_joined?
     where(:has_joined => false).count == 0
   end
 
   def self.finished_players
-    where(place: !nil).count
+    finished.count
   end
 
   def self.who_are_playing
@@ -25,5 +29,9 @@ class GameRecord < ApplicationRecord
 
   def has_finished?
     self.move_records.finished.count == 4
+  end
+
+  def self.check_players_and_set_last
+    not_finished.update_all(:place, "LAST")
   end
 end

@@ -7,7 +7,7 @@ class User::FromOauth
         else
             return nil if User.find_by(email: @profile['email'])
             new_user = User.create(user_params)
-            UserRecord.create(user_id: new_user)
+            UserRecord.create(user_id: new_user.id) 
             new_user
         end
     end

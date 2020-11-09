@@ -32,10 +32,10 @@ class Game::JoinStart
             payload: fetch_game_data
         ) 
         if @game.can_start?
-            ActionCable.server.broadcast(
-                @room_channel,
-                action: "start",
-                payload: players_piece_positions
+            GameCommsJob.perform_now(
+                "start",
+                players_piece_positions,
+                to_where: @room_channel
             )
         end
         # GameCommsJob.set(wait_until: @game.join_window).perform_now("start", nil, to_where: @room_channel)
@@ -46,54 +46,86 @@ class Game::JoinStart
         @game.save
     end
 
-    def move_piece(data)
-        piece(data["whichPlayer"],data["whichPiece"]).move_piece!(data["dice"].to_i)
-        ActionCable.server.broadcast(
-            @room_channel,
-            action: "move_piece",
-            payload: data
-        )
-        player_home(data["whichPlayer"]) if @game.this_player(data["whichPlayer"]).has_finished?
-        end_game  if no_of_players - 1 == no_of_players_finished
-        @dice_value = 0
-    end
-
-    def kill_piece(data)
-        piece(data["whichPlayer"],data["whichPiece"]).kill_piece!
-        ActionCable.server.broadcast(
-            @room_channel,
-            action: "kill_piece",
-            payload: data
-        )
-    end
-
-    def end_game
-        @game.status = "FINISHED"
-        @game.save
-        ActionCable.server.broadcast(
-            @room_channel,
-            action: "end"
-        )
-    end
-
-    def player_home(which_player)
-        @player.user_record.add_points(POINTS[no_of_players_finished])
-        @player.user_record.check_and_raise_level
-        @game.game_records.player_home!(data["whichPlayer"], PLACE[no_of_players_finished])
-        ActionCable.server.broadcast(
-            @room_channel,
-            action: "player_home",
-            payload: {
-                whichPlayer: which_player
-            }
-        )
-    end
-
     def roll_dice(data)
         GameCommsJob.perform_now("rolling", data, to_where: @room_channel)
         @dice_value = ((rand * 9876543210).to_i % 6) + 1
         data[:dice] = @dice_value
+        dice["nextPlayer"] = next_player
+        dice["choosePiece"] = !(player_move_records.pieces_out == 0 && @dice_value != 6)
         GameCommsJob.perform_now("dice_rolled", data, to_where: @room_channel)
+    end
+
+    def move_piece(data)
+        current_player_piece = piece(data["whichPlayer"],data["whichPiece"])
+        current_player_piece.move_piece!(@dice_value)
+        GameCommsJob.perform_now(
+            "move_piece",
+            {
+                whichPlayer: data["whichPlayer"],
+                whichPiece: data["whichPiece"],
+                dice: @dice_value
+                nextPlayer: next_player
+            },
+            to_where: @room_channel
+        )
+        can_i_kill(current_player_piece)
+        player_home(data["whichPlayer"]) if @game.this_player(data["whichPlayer"]).has_finished?
+        end_game if no_of_players - 1 == no_of_players_finished
+        @dice_value = 0
+    end
+
+    def can_i_kill(current_player_piece)
+        pieces_out = @game.move_records.pieces_out_except_mine(players_game_record.which_player)
+        pieces_out.each do |killable_piece|
+            kill_piece if can_kill_piece?(current_player_piece, killable_piece)
+        end
+    end
+
+    def can_kill_piece?(piece1, piece2)
+        piece1_player_name = piece1.player[/\d/].to_i
+        piece2_player_name = piece2.player[/\d/].to_i
+        player_difference = (piece1_player_name - piece_2_player_name) * 13
+        new_piece1_position = piece1.last_position - player_difference
+        new_piece1_position += 52 if new_piece1_position < 0
+        new_piece1_position -= 52 if new_piece1_position > 52
+        kill_piece(piece2) if new_piece1_position == piece2.last_position
+    end
+
+    def kill_piece(piece_to_kill)
+        piece_to_kill.kill_piece!
+        GameCommsJob.perform_now(
+            "kill_piece",
+            {
+                whichPlayer: piece_to_kill.player,
+                whichPiece: piece_to_kill.piece
+            },
+            to_where: @room_channel
+        )
+    end
+
+    def player_home(which_player)
+        place = no_of_players_finished
+        @player.user_record.add_points(POINTS[place])
+        @player.user_record.check_and_raise_level
+        @game.game_records.player_home!(data["whichPlayer"], PLACE[place])
+        GameCommsJob.perform_now(
+            "player_home",
+            {
+                whichPlayer: which_player
+            },
+            to_where: @room_channel
+        )
+    end
+
+    def end_game
+        @game.game_records.check_players_and_set_last
+        @game.status = "FINISHED"
+        @game.save
+        GameCommsJob.perform_now(
+            "end",
+            nil,
+            to_where: @room_channel,
+        )
     end
 
     def fetch_game_data
@@ -106,16 +138,19 @@ class Game::JoinStart
         }
     end
 
-    def next_player(data)
-        nxt_player = find_next_player
-        @game.update_attribute(:current_player, nxt_player)
-        ActionCable.server.broadcast(
-            @room_channel,
-            action: "next_player",
-            payload: {
-                nextPlayer: @game.current_player
-            }
-        )
+    def next_player
+        if @dice_value != 6
+            nxt_player = find_next_player
+            @game.update_attribute(:current_player, nxt_player)
+        end
+        return @game.current_player
+        # GameCommsJob.perform_now(
+        #     "next_player",
+        #     {
+        #         nextPlayer: @game.current_player
+        #     },
+        #     to_where: @room_channel
+        # )
     end
 
     def players_game_record
@@ -129,7 +164,7 @@ class Game::JoinStart
         @game.no_of_players_finished
     end
 
-    def find_next_player()
+    def find_next_player
         curr_player = @game.current_player
         players = @game.game_players
         puts players
@@ -157,6 +192,10 @@ class Game::JoinStart
     end
 
     def piece(which_player, piece_name)
-        @game.this_player(which_player).move_records.find_by(piece: piece_name)
+        player_move_records(which_player).find_by(piece: piece_name)
+    end
+
+    def player_move_records(which_player)
+        @game.this_player(which_player).move_records
     end
 end

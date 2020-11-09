@@ -20,6 +20,10 @@
         showFW = true;
         which = 'view-invites';
       "
+      @view-saved="
+        showFW = true;
+        which = 'view-saved';
+      "
     />
     <OverAllStats />
     <StartGame
@@ -36,10 +40,11 @@
       "
     >
       <Settings v-if="which === 'settings'" />
-      <Invite v-if="which === 'invite'" />
-      <AllInvites v-if="which === 'view-invites'" />
-      <Profile v-if="which === 'profile'" />
-      <ChooseGame v-if="which === 'game'" />
+      <Invite v-else-if="which === 'invite'" />
+      <AllGames v-else-if="which === 'view-invites'" :title="'All Invites'" :type="'invites'" />
+      <AllGames v-else-if="which === 'view-saved'" :title="'Saved Gamed'" :type="'saved'" />
+      <Profile v-else-if="which === 'profile'" />
+      <ChooseGame v-else-if="which === 'game'" />
     </FloatingWindow>
   </section>
 </template>
@@ -54,7 +59,7 @@ import Settings from './Settings.vue'
 import Invite from './Invite.vue'
 import Profile from './Profile.vue'
 import ChooseGame from './ChooseGame.vue'
-import AllInvites from './AllInvites'
+import AllGames from './AllGames.vue'
 
 export default {
   data () {
@@ -73,7 +78,7 @@ export default {
     Invite,
     Profile,
     ChooseGame,
-    AllInvites
+    AllGames
   }
 }
 </script>

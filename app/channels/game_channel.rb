@@ -12,7 +12,7 @@ class GameChannel < ApplicationCable::Channel
   end
   
   def kill_piece(data)
-    @game_room.kill_piece(data)
+    # @game_room.kill_piece(data)
   end
 
   def next_player(data)

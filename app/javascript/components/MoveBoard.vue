@@ -82,35 +82,14 @@ export default {
     diceRolled(payload) {
       setTimeout(() => {
         this.$store.commit(`${payload.whichPlayer}/rollDice`, payload.dice)
-        this.$store.dispatch(`${payload.whichPlayer}/diceRolled`, {
-          dice: payload.dice
-        }).then(result => {
-          if (result) {
-            this.$cable.perform({
-              channel: 'my_game_room',
-              action: 'next_player',
-              data: {
-                currentPlayer: payload.whichPlayer
-              }
-            })
-          } else {
-            this.$store.commit(`${payload.whichPlayer}/choosePiece`, true)
-          }
-        })
+        this.$store.commit(`${payload.whichPlayer}/choosePiece`, true)
+        this.$store.commit("nextPlayer", payload.nextPlayer);
       }, 1000);
     },
     movePiece(payload) {
       console.log("moving " + payload.whichPiece)
-      this.$store.dispatch(`movePiece`, payload).then(() => {
-        if (payload.dice !== 6) {
-          this.$cable.perform({
-            channel: 'my_game_room',
-            action: 'next_player',
-            data: {
-              currentPlayer: payload.whichPlayer
-            }
-          })
-        }
+      this.$store.dispatch(`${payload.whichPlayer}/movePiece`, payload).then(() => {
+        this.$store.commit("nextPlayer", payload.nextPlayer);
       });
       this.$store.commit(`${payload.whichPlayer}/choosePiece`, false)
     },

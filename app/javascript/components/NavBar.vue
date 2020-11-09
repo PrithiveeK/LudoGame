@@ -19,7 +19,7 @@
         <span>Created Invites</span>
         <i></i>
       </li>
-      <li title="Saved Games">
+      <li title="Saved Games" @click="$emit('view-saved')">
         <span>Saved Games</span>
         <i></i>
       </li>
